@@ -1,11 +1,12 @@
 import { AppBar, Toolbar, Box, Button, IconButton } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-// TODO: replace with real user from auth context once set up
-const user = null;
 
 function Navbar() {
+    const { user } = useAuth();
+
     return (
         <AppBar position="static" color="primary">
             <Toolbar sx={{ justifyContent: "space-between" }}>
