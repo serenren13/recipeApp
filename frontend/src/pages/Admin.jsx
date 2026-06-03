@@ -75,12 +75,12 @@ export default function Admin() {
 
       <Box sx={{ maxWidth: 800, mx: 'auto', px: 3, pt: 4, pb: 8 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Typography sx={{ color: '#7AE2CF' }} fontWeight={600}>
+            <Typography sx={{ color: '#fdeb9e' }} fontWeight={600}>
                 Welcome back, Admin!
             </Typography>
 
-            <Typography sx={{ color: '#7AE2CF' }} variant="h4" fontWeight={700}>
-                Recipe Review
+            <Typography sx={{ color: '#fdeb9e' }} variant="h4" fontWeight={700}>
+                <strong>Recipe Review</strong>
             </Typography>
         </Box>
 
@@ -100,7 +100,7 @@ export default function Admin() {
                     borderColor: '#7AE2CF',
                 },
             }}
-            InputProps={{
+            slotProps={{
               startAdornment: (
                 <InputAdornment position="start">
                   <SearchIcon sx={{ color: '#077A7D' }} />
