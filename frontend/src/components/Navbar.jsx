@@ -2,6 +2,8 @@ import { AppBar, Toolbar, Box, Button, IconButton } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
 
 function Navbar() {
@@ -28,7 +30,7 @@ function Navbar() {
                         <IconButton color="secondary">
                             <NotificationsIcon />
                         </IconButton>
-                        <Button variant="contained" color="secondary">Log Out</Button>
+                        <Button variant="contained" color="secondary" onClick={() => signOut(auth)}>Log Out</Button>
                         </>
                     ) : (
                         // NOT SIGNED IN
