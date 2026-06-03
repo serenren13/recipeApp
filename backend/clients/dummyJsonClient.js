@@ -33,7 +33,9 @@ async function fetchRecipesByTag(tag, { limit = 30, skip = 0 } = {}) {
 }
 
 async function fetchRecipesByMealType(mealType, { limit = 30, skip = 0 } = {}) {
-  const url = `${BASE_URL}/meal-type/${encodeURIComponent(mealType)}?limit=${limit}&skip=${skip}`;
+  // DummyJSON meal-type values are capitalized (e.g. "Dinner" not "dinner")
+  const normalized = mealType.charAt(0).toUpperCase() + mealType.slice(1).toLowerCase();
+  const url = `${BASE_URL}/meal-type/${encodeURIComponent(normalized)}?limit=${limit}&skip=${skip}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`DummyJSON error: ${res.status}`);
   return res.json();
