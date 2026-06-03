@@ -1,10 +1,29 @@
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import RecipeCard from "../components/RecipeCard";
+import { getOfficialRecipes } from "../api/recipeApi";
 
 function Home() {
 
    const { user } = useAuth();
+   const [trending, setTrending] = useState([]);
+   const [loading, setLoading] = useState(true);
+
+   useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const data = await getOfficialRecipes({ limit: 10 });
+        setTrending(data.recipes);
+      } catch (err) {
+        console.error("Failed to fetch trending recipes", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTrending();
+   }, []);
 
   return (
     <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", px: 4, py: 6 }}>
@@ -12,7 +31,7 @@ function Home() {
       {/* Hero Section */}
       <Box sx={{ mb: 6 }}>
         <Typography variant="h3" sx={{ color: "text.primary", fontWeight: 700, mb: 1 }}>
-          {user ? `Welcome Back, ${user.displayName || "Chef"}!` : "Welcome to RecipeApp"}
+          {user ? `Welcome Back, ${user.displayName || "Chef"}!` : "Welcome to Food Connect"}
         </Typography>
         <Typography variant="body1" sx={{ color: "text.secondary", mb: 3 }}>
           {user
@@ -41,25 +60,30 @@ function Home() {
             See All →
           </Button>
         </Box>
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+            <CircularProgress sx={{ color: "primary.main" }} />
+          </Box>
+        ) : (
         <Box sx={{ display: "flex", gap: 2, overflowX: "auto", pb: 1 }}>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Box
-              key={i}
-              sx={{
-                minWidth: 200,
-                height: 240,
-                backgroundColor: "primary.main",
-                borderRadius: "12px",
-                border: "1px solid",
-                borderColor: "primary.light",
-                flexShrink: 0,
-              }}
-            />
+          {trending.map((recipe) => (
+            <Box key={recipe.id} sx={{ minWidth: 220, flexShrink: 0 }}>
+              <RecipeCard
+                id={recipe.id}
+                title={recipe.title}
+                imageUrl={recipe.imageUrl}
+                cookTimeMinutes={recipe.cookTimeMinutes}
+                difficulty={recipe.difficulty}
+                rating={recipe.rating}
+                cuisine={recipe.cuisine}
+              />
+            </Box>
           ))}
         </Box>
+        )}
       </Box>
 
-      {/* Community Recipes Section */}
+      {/* Community Recipes - placeholder until Firestore is set up */}
       <Box sx={{ mb: 6 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
           <Typography variant="h5" sx={{ color: "text.primary", fontWeight: 600 }}>
@@ -69,21 +93,10 @@ function Home() {
             See All →
           </Button>
         </Box>
-        <Box sx={{ display: "flex", gap: 2, overflowX: "auto", pb: 1 }}>
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Box
-              key={i}
-              sx={{
-                minWidth: 200,
-                height: 240,
-                backgroundColor: "primary.main",
-                borderRadius: "12px",
-                border: "1px solid",
-                borderColor: "primary.light",
-                flexShrink: 0,
-              }}
-            />
-          ))}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", py: 4 }}>
+          <Typography variant="body1" sx={{ color: "text.secondary" }}>
+            Community recipes coming soon!
+          </Typography>
         </Box>
       </Box>
 
