@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import RecipeCard from "../components/RecipeCard";
+import { getOfficialRecipes } from "../api/recipeApi";
 
 function Home() {
 
@@ -13,8 +14,7 @@ function Home() {
    useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await fetch("http://localhost:5001/api/recipes/official?limit=10");
-        const data = await res.json();
+        const data = await getOfficialRecipes({ limit: 10 });
         setTrending(data.recipes);
       } catch (err) {
         console.error("Failed to fetch trending recipes", err);
