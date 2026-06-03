@@ -1,10 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar'
+import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import SignIn from './pages/SignIn';
 import Register from './pages/Register';
 import CreateRecipe from './pages/CreateRecipe';
 import AdminPage from './pages/Admin';
+import Recipes from './pages/Recipes';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/recipes" element={<Recipes />} />
         <Route path="/create-recipe" element={<CreateRecipe />} />
         <Route path="/admin" element={<AdminPage />} />
       </Routes>
