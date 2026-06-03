@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
-const recipeRoutes = require('./routes/recipes');
+const recipeRoutes = require('./routes/recipeRoutes');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -16,6 +17,9 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/recipes', recipeRoutes);
+
+// Must be registered after all routes
+app.use(errorHandler);
 
 app.listen(PORT, HOST, () => {
   console.log(`Server running at http://${HOST}:${PORT}`);
