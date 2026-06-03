@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { getOfficialRecipes } from "../api/recipeApi";
 
 const LIMIT = 12;
 const cache = {};
@@ -28,9 +29,7 @@ export function useRecipes() {
                 return;
             }
 
-            const res = await fetch(`http://localhost:5001/api/recipes/official?limit=${LIMIT}&skip=${skip}&q=${search}`);
-            if (!res.ok) throw new Error("Failed to fetch recipes");
-            const data = await res.json();
+            const data = await getOfficialRecipes({ limit: LIMIT, skip, q: search || undefined });
 
             cache[cacheKey] = { recipes: data.recipes, total: data.total };
             setRecipes(data.recipes);
