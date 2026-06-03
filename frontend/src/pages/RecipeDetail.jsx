@@ -15,6 +15,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import { getOfficialRecipeById } from '../api/recipeApi';
 import CommentsSection from '../components/CommentsSection';
+import RecipeChat from '../components/RecipeChat';
 
 export default function RecipeDetail() {
   const { id } = useParams();
@@ -214,6 +215,8 @@ export default function RecipeDetail() {
         <Divider sx={{ borderColor: '#077A7D', mb: 4 }} />
         <CommentsSection recipeKey={`official_${id}`} />
       </Box>
+
+      <RecipeChat recipe={recipe} />
 
     </Box>
   );

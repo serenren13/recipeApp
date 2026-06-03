@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 
 const recipeRoutes = require('./routes/recipeRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -17,6 +18,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Must be registered after all routes
 app.use(errorHandler);
