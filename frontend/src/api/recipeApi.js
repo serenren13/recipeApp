@@ -37,3 +37,12 @@ export async function getOfficialTags() {
   if (!res.ok) throw new Error(`Failed to fetch tags: ${res.status}`);
   return res.json();
 }
+
+// Fetch all available cuisine tags.
+// Returns an array of cuisine tag strings.
+
+export async function getOfficialCuisines() {
+  const res = await fetch('/api/recipes/official/cuisines');
+  if (!res.ok) throw new Error(`Failed to fetch cuisines: ${res.status}`);
+  return res.json();
+}

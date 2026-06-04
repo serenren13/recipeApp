@@ -29,4 +29,16 @@ async function getOfficialTags() {
   return client.fetchAllTags();
 }
 
-module.exports = { getOfficialRecipes, getOfficialRecipeById, getOfficialTags };
+// Returns a curated list of cuisine-level tags only
+async function getOfficialCuisines() {
+  const allTags = await client.fetchAllTags();
+  const CUISINE_TAGS = [
+    "Italian", "Asian", "Indian", "Mexican", "Japanese",
+    "Korean", "Greek", "Thai", "Lebanese", "Mediterranean",
+    "Pakistani", "Moroccan", "Vietnamese", "Turkish", "Brazilian",
+    "Spanish", "Cuban", "Hawaiian"
+  ];
+  return allTags.filter((tag) => CUISINE_TAGS.includes(tag));
+}
+
+module.exports = { getOfficialRecipes, getOfficialRecipeById, getOfficialTags, getOfficialCuisines };
