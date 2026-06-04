@@ -5,6 +5,7 @@ import TuneIcon from "@mui/icons-material/Tune";
 import CloseIcon from "@mui/icons-material/Close";
 import { useState, useEffect } from "react";
 import { getOfficialCuisines } from "../api/recipeApi";
+import { chipActiveSx, chipOutlinedSx } from "../styles/styles";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Snack", "Appetizer"];
 
@@ -85,17 +86,12 @@ export default function FilterPanel({
                                 onClick={() => setPending("cuisine", c)}
                                 variant={pendingFilters.cuisine === c ? "filled" : "outlined"}
                                 size="small"
-                                sx={{
-                                    borderColor: "primary.main",
-                                    color: pendingFilters.cuisine === c ? "secondary.main" : "text.secondary",
-                                    backgroundColor: pendingFilters.cuisine === c ? "primary.main" : "transparent",
-                                    cursor: "pointer",
-                                }}
+                                sx={pendingFilters.cuisine === c ? chipActiveSx : chipOutlinedSx}
                             />
                         ))}
                     </Box>
 
-                    <Divider sx={{ borderColor: "primary.main", mb: 2 }} />
+                    <Divider sx={{ mb: 2 }} />
 
                     {/* Meal Type */}
                     <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600, mb: 1}}>
@@ -109,17 +105,12 @@ export default function FilterPanel({
                                 onClick={() => setPending("mealType", m.toLowerCase())}
                                 variant={pendingFilters.mealType === m.toLowerCase() ? "filled" : "outlined"}
                                 size="small"
-                                sx={{
-                                    borderColor: "primary.main",
-                                    color: pendingFilters.mealType === m.toLowerCase() ? "secondary.main" : "text.secondary",
-                                    backgroundColor: pendingFilters.mealType === m.toLowerCase() ? "primary.main" : "transparent",
-                                    cursor: "pointer",
-                                }}
+                                sx={pendingFilters.mealType === m.toLowerCase ? chipActiveSx : chipOutlinedSx}
                             />
                         ))}
                     </Box>
 
-                    <Divider sx={{ borderColor: "primary.main", mb: 2 }} />
+                    <Divider sx={{ mb: 2 }} />
 
                     {/* Cook Time */}
                     <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600, mb: 1 }}>
@@ -133,17 +124,12 @@ export default function FilterPanel({
                                 onClick={() => setPending("cookTime", t.value)}
                                 variant={pendingFilters.cookTime === t.value ? "filled" : "outlined"}
                                 size="small"
-                                sx={{
-                                    borderColor: "primary.main",
-                                    color: pendingFilters.cookTime === t.value ? "secondary.main" : "text.secondary",
-                                    backgroundColor: pendingFilters.cookTime === t.value ? "primary.main" : "transparent",
-                                    cursor: "pointer",
-                                }}
+                                sx={pendingFilters.cookTime === t.value ? chipActiveSx : chipOutlinedSx}
                             />
                         ))}
                     </Box>
 
-                    <Divider sx={{ borderColor: "primary.main", mb: 2 }} />
+                    <Divider sx={{ mb: 2 }} />
 
                     {/* Minimum Rating */}
                     <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: 600, mb: 1 }}>

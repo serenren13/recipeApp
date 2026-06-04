@@ -1,4 +1,5 @@
 import { Box, Chip } from "@mui/material";
+import { chipActiveSx } from "../styles/styles";
 
 const COOK_TIME_LABELS = {
     under15: "Under 15 min",
@@ -18,11 +19,7 @@ export default function ActiveFilterChips({ activeFilters, clearFilter }) {
                     label={`🍽 ${activeFilters.cuisine}`}
                     onDelete={() => clearFilter("cuisine")}
                     size="small"
-                    sx={{
-                        backgroundColor: "primary.main",
-                        color: "secondary.main",
-                        "& .MuiChip-deleteIcon": { color: "secondary.main" },
-                    }}
+                    sx={chipActiveSx}
                 />
             )}
             {activeFilters.mealType && (
@@ -30,11 +27,7 @@ export default function ActiveFilterChips({ activeFilters, clearFilter }) {
                     label={`🕐 ${activeFilters.mealType}`}
                     onDelete={() => clearFilter("mealType")}
                     size="small"
-                    sx={{
-                        backgroundColor: "primary.main",
-                        color: "secondary.main",
-                        "& .MuiChip-deleteIcon": { color: "secondary.main" },
-                    }}
+                    sx={chipActiveSx}
                 />
             )}
             {activeFilters.cookTime && (
@@ -42,11 +35,7 @@ export default function ActiveFilterChips({ activeFilters, clearFilter }) {
                     label={`⏱ ${COOK_TIME_LABELS[activeFilters.cookTime]}`}
                     onDelete={() => clearFilter("cookTime")}
                     size="small"
-                    sx={{
-                        backgroundColor: "primary.main",
-                        color: "secondary.main",
-                        "& .MuiChip-deleteIcon": { color: "secondary.main" },
-                    }}
+                    sx={chipActiveSx}
                 />
             )}
             {activeFilters.rating && (
@@ -54,11 +43,7 @@ export default function ActiveFilterChips({ activeFilters, clearFilter }) {
                     label={`⭐ ${activeFilters.rating}+ stars`}
                     onDelete={() => clearFilter("rating")}
                     size="small"
-                    sx={{
-                        backgroundColor: "primary.main",
-                        color: "secondary.main",
-                        "& .MuiChip-deleteIcon": { color: "secondary.main" },
-                    }}
+                    sx={chipActiveSx}
                 />
             )}
         </Box>
