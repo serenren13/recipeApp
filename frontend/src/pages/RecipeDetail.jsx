@@ -7,50 +7,64 @@ import {
   CircularProgress,
   Divider,
   Grid,
+  Button
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import StarIcon from '@mui/icons-material/Star';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+
 import { getOfficialRecipeById } from '../api/recipeApi';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
+
 import CommentsSection from '../components/CommentsSection';
 import RecipeChat from '../components/RecipeChat';
+import { useAuth } from '../context/AuthContext';
 
 export default function RecipeDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isUserRecipe, setIsUserRecipe] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
+  // -----------------------
+  // LOAD RECIPE
+  // -----------------------
   useEffect(() => {
     setLoading(true);
     setError(null);
 
-    // If ID is a number → official recipe; if string → Firestore user recipe
     const isOfficial = /^\d+$/.test(id);
 
     if (isOfficial) {
       setIsUserRecipe(false);
+
       getOfficialRecipeById(id)
         .then(setRecipe)
         .catch((err) => setError(err.message))
         .finally(() => setLoading(false));
+
     } else {
       setIsUserRecipe(true);
+
       getDoc(doc(db, 'recipes', id))
         .then((snap) => {
           if (!snap.exists()) throw new Error('Recipe not found.');
+
           const data = snap.data();
-          // Normalize Firestore recipe to match the shape the UI expects
+
           setRecipe({
             id: snap.id,
             title: data.title,
+            imageUrl: data.imageUrl,
             ingredients: typeof data.ingredients === 'string'
               ? data.ingredients.split('\n').filter(Boolean)
               : data.ingredients || [],
@@ -59,6 +73,14 @@ export default function RecipeDetail() {
               : data.instructions || [],
             authorName: data.authorName || 'Unknown',
             status: data.status,
+            prepTimeMinutes: data.prepTimeMinutes,
+            cookTimeMinutes: data.cookTimeMinutes,
+            difficulty: data.difficulty,
+            servings: data.servings,
+            caloriesPerServing: data.caloriesPerServing,
+            rating: data.rating,
+            reviewCount: data.reviewCount,
+            cuisine: data.cuisine,
           });
         })
         .catch((err) => setError(err.message))
@@ -66,6 +88,44 @@ export default function RecipeDetail() {
     }
   }, [id]);
 
+  // -----------------------
+  // SAVE RECIPE
+  // -----------------------
+  const handleSave = async () => {
+    if (!user) return;
+
+    try {
+      setSaving(true);
+
+      const savedRef = collection(db, 'users', user.uid, 'savedRecipes');
+
+      // prevent duplicates
+      const q = query(savedRef, where('recipeId', '==', id));
+      const existing = await getDocs(q);
+
+      if (!existing.empty) {
+        setSaved(true);
+        setSaving(false);
+        return;
+      }
+
+      await addDoc(savedRef, {
+        recipeId: id,
+        source: isUserRecipe ? 'user' : 'api',
+        savedAt: serverTimestamp()
+      });
+
+      setSaved(true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // -----------------------
+  // LOADING / ERROR
+  // -----------------------
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
@@ -77,28 +137,40 @@ export default function RecipeDetail() {
   if (error || !recipe) {
     return (
       <Box sx={{ textAlign: 'center', mt: 10 }}>
-        <Typography sx={{ color: '#FDEB9E' }}>{error ?? 'Recipe not found.'}</Typography>
+        <Typography sx={{ color: '#FDEB9E' }}>
+          {error ?? 'Recipe not found.'}
+        </Typography>
       </Box>
     );
   }
 
-  const totalMinutes = (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
-  const difficultyColor =
-    recipe.difficulty === 'Easy' ? '#7AE2CF'
-    : recipe.difficulty === 'Medium' ? '#FDEB9E'
-    : '#e57373';
+  const totalMinutes =
+    (recipe.prepTimeMinutes ?? 0) + (recipe.cookTimeMinutes ?? 0);
 
+  const difficultyColor =
+    recipe.difficulty === 'Easy'
+      ? '#7AE2CF'
+      : recipe.difficulty === 'Medium'
+      ? '#FDEB9E'
+      : '#e57373';
+
+  // -----------------------
+  // UI
+  // -----------------------
   return (
     <Box sx={{ backgroundColor: '#06202B', minHeight: '100vh', pb: 8 }}>
 
-      {/* Back button */}
+      {/* Back */}
       <Box sx={{ px: { xs: 2, md: 6 }, pt: 3 }}>
         <Box
           onClick={() => navigate(-1)}
           sx={{
-            display: 'inline-flex', alignItems: 'center', gap: 0.5,
-            cursor: 'pointer', color: '#7AE2CF',
-            '&:hover': { color: '#FDEB9E' }, transition: 'color 0.2s',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 0.5,
+            cursor: 'pointer',
+            color: '#7AE2CF',
+            '&:hover': { color: '#FDEB9E' },
           }}
         >
           <ArrowBackIcon fontSize="small" />
@@ -106,7 +178,24 @@ export default function RecipeDetail() {
         </Box>
       </Box>
 
-      {/* Hero image — official only */}
+      {/* Save Button */}
+      <Box sx={{ px: { xs: 2, md: 6 }, mt: 2 }}>
+        <Button
+          onClick={handleSave}
+          disabled={saving || saved}
+          variant="contained"
+          sx={{
+            backgroundColor: saved ? '#7AE2CF' : '#077A7D',
+            color: '#06202B',
+            fontWeight: 700,
+            '&:hover': { backgroundColor: '#7AE2CF' }
+          }}
+        >
+          {saved ? 'Saved ✓' : saving ? 'Saving...' : 'Save Recipe'}
+        </Button>
+      </Box>
+
+      {/* Image */}
       {!isUserRecipe && recipe.imageUrl && (
         <Box sx={{ px: { xs: 0, md: 6 }, mt: 2 }}>
           <Box
@@ -114,97 +203,60 @@ export default function RecipeDetail() {
             src={recipe.imageUrl}
             alt={recipe.title}
             sx={{
-              width: '100%', height: { xs: 220, sm: 340, md: 420 },
-              objectFit: 'cover', borderRadius: { xs: 0, md: '16px' }, display: 'block',
+              width: '100%',
+              height: { xs: 220, sm: 340, md: 420 },
+              objectFit: 'cover',
+              borderRadius: { xs: 0, md: '16px' },
             }}
           />
         </Box>
       )}
 
-      {/* Title + tags */}
+      {/* Title */}
       <Box sx={{ px: { xs: 2, md: 6 }, mt: 3 }}>
         <Typography variant="h4" fontWeight={700} sx={{ color: '#FDEB9E' }}>
           {recipe.title}
         </Typography>
-
-        {isUserRecipe ? (
-          <Typography variant="body2" sx={{ color: '#7AE2CF', mt: 1 }}>
-            By {recipe.authorName}
-          </Typography>
-        ) : (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
-            {recipe.cuisine && (
-              <Chip label={recipe.cuisine} size="small" sx={{ backgroundColor: '#077A7D', color: '#FDEB9E' }} />
-            )}
-            {recipe.tags?.map((tag) => (
-              <Chip key={tag} label={tag} size="small" variant="outlined" sx={{ borderColor: '#077A7D', color: '#7AE2CF' }} />
-            ))}
-            {recipe.mealType?.map((mt) => (
-              <Chip key={mt} label={mt} size="small" sx={{ backgroundColor: '#06202B', border: '1px solid #7AE2CF', color: '#7AE2CF' }} />
-            ))}
-          </Box>
-        )}
       </Box>
 
-      {/* Stats strip — official only */}
+      {/* Stats */}
       {!isUserRecipe && (
-        <Box sx={{ px: { xs: 2, md: 6 }, mt: 3, display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'center' }}>
-          <StatItem icon={<AccessTimeIcon sx={{ fontSize: 18, color: '#7AE2CF' }} />} label="Total Time" value={`${totalMinutes} min`} />
-          <StatItem icon={<AccessTimeIcon sx={{ fontSize: 18, color: '#7AE2CF' }} />} label="Prep" value={`${recipe.prepTimeMinutes} min`} />
-          <StatItem icon={<AccessTimeIcon sx={{ fontSize: 18, color: '#7AE2CF' }} />} label="Cook" value={`${recipe.cookTimeMinutes} min`} />
-          <StatItem icon={<PeopleIcon sx={{ fontSize: 18, color: '#7AE2CF' }} />} label="Servings" value={recipe.servings} />
-          <StatItem icon={<LocalFireDepartmentIcon sx={{ fontSize: 18, color: '#7AE2CF' }} />} label="Calories" value={`${recipe.caloriesPerServing} kcal`} />
-          <StatItem icon={<StarIcon sx={{ fontSize: 18, color: '#FDEB9E' }} />} label="Rating" value={`${recipe.rating} (${recipe.reviewCount})`} />
-          <Box>
-            <Typography variant="caption" sx={{ color: '#7AE2CF', display: 'block' }}>Difficulty</Typography>
-            <Typography variant="body2" fontWeight={700} sx={{ color: difficultyColor }}>{recipe.difficulty}</Typography>
-          </Box>
+        <Box sx={{ px: { xs: 2, md: 6 }, mt: 3, display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+          <StatItem icon={<AccessTimeIcon sx={{ color: '#7AE2CF' }} />} label="Total" value={`${totalMinutes} min`} />
+          <StatItem icon={<PeopleIcon sx={{ color: '#7AE2CF' }} />} label="Servings" value={recipe.servings} />
+          <StatItem icon={<StarIcon sx={{ color: '#FDEB9E' }} />} label="Rating" value={recipe.rating} />
         </Box>
       )}
 
       <Divider sx={{ mx: { xs: 2, md: 6 }, mt: 3, borderColor: '#077A7D' }} />
 
       {/* Ingredients + Instructions */}
-      <Grid container spacing={3} sx={{ px: { xs: 2, md: 6 }, mt: 0.5 }}>
-
-        <Grid size={{ xs: 12, md: 3 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ color: '#FDEB9E', mb: 1.5 }}>
-            Ingredients
-          </Typography>
-          <Box component="ul" sx={{ pl: 2, m: 0 }}>
-            {recipe.ingredients?.map((ing, i) => (
-              <Box component="li" key={i} sx={{ color: '#7AE2CF', mb: 0.75, fontSize: '0.95rem', lineHeight: 1.5 }}>
-                {ing}
-              </Box>
+      <Grid container spacing={3} sx={{ px: { xs: 2, md: 6 }, mt: 1 }}>
+        <Grid item xs={12} md={4}>
+          <Typography sx={{ color: '#FDEB9E', mb: 1 }}>Ingredients</Typography>
+          <ul>
+            {recipe.ingredients.map((i, idx) => (
+              <li key={idx} style={{ color: '#7AE2CF' }}>{i}</li>
             ))}
-          </Box>
+          </ul>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 9 }}>
-          <Typography variant="h6" fontWeight={700} sx={{ color: '#FDEB9E', mb: 1.5 }}>
-            Instructions
-          </Typography>
-          <Box sx={{ border: '1.5px solid #077A7D', borderRadius: '12px', p: { xs: 2, md: 3 }, backgroundColor: 'rgba(7, 122, 125, 0.07)' }}>
-            {recipe.instructions?.map((step, i) => (
-              <Box key={i} sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <Box sx={{ flexShrink: 0, width: 28, height: 28, borderRadius: '50%', backgroundColor: '#077A7D', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Typography variant="caption" fontWeight={700} sx={{ color: '#FDEB9E' }}>{i + 1}</Typography>
-                </Box>
-                <Typography variant="body2" sx={{ color: '#FDEB9E', lineHeight: 1.7, pt: 0.3 }}>{step}</Typography>
-              </Box>
-            ))}
-          </Box>
+        <Grid item xs={12} md={8}>
+          <Typography sx={{ color: '#FDEB9E', mb: 1 }}>Instructions</Typography>
+          {recipe.instructions.map((step, i) => (
+            <Typography key={i} sx={{ color: '#FDEB9E', mb: 1 }}>
+              {i + 1}. {step}
+            </Typography>
+          ))}
         </Grid>
       </Grid>
 
       {/* Comments */}
       <Box sx={{ px: { xs: 2, md: 6 }, mt: 5 }}>
-        <Divider sx={{ borderColor: '#077A7D', mb: 4 }} />
         <CommentsSection recipeKey={isUserRecipe ? `user_${id}` : `official_${id}`} />
       </Box>
 
       <RecipeChat recipe={recipe} />
-
     </Box>
   );
 }
@@ -212,11 +264,11 @@ export default function RecipeDetail() {
 function StatItem({ icon, label, value }) {
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+      <Box sx={{ display: 'flex', gap: 0.5 }}>
         {icon}
-        <Typography variant="caption" sx={{ color: '#7AE2CF' }}>{label}</Typography>
+        <Typography sx={{ color: '#7AE2CF', fontSize: 12 }}>{label}</Typography>
       </Box>
-      <Typography variant="body2" fontWeight={600} sx={{ color: '#FDEB9E' }}>{value}</Typography>
+      <Typography sx={{ color: '#FDEB9E' }}>{value}</Typography>
     </Box>
   );
 }
