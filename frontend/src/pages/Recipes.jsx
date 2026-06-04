@@ -61,15 +61,17 @@ function Recipes() {
                     {recipes.map((recipe) => (
                     <Grid size={{ xs: 12, sm: 6, md: 4 }} key={recipe.id}>
                         <RecipeCard
-                            id={recipe.id}
-                            title={recipe.title}
-                            imageUrl={recipe.imageUrl}
-                            cookTimeMinutes={recipe.cookTimeMinutes}
-                            difficulty={recipe.difficulty}
-                            rating={recipe.rating}
-                            cuisine={recipe.cuisine}
-                            isUserRecipe={tab === "user"}
-                        />
+  id={recipe.id}
+  title={recipe.title}
+  imageUrl={recipe.imageUrl}
+  cookTimeMinutes={recipe.cookTimeMinutes}
+  difficulty={recipe.difficulty}
+  rating={recipe.rating}
+  cuisine={recipe.cuisine}
+  isUserRecipe={tab === "user"}
+  authorName={recipe.authorName}
+  status={recipe.status}
+/>
 
                     </Grid>
                     ))}
