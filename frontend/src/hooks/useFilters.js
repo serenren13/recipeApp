@@ -30,6 +30,11 @@ export function useFilters() {
         setPanelOpen(false);
     };
 
+    const clearFilter = (key) => {
+        setActiveFilters((prev) => ({ ...prev, [key]: key === "rating" ? null : "" }));
+        setPendingFilters((prev) => ({ ...prev, [key]: key === "rating" ? null : "" }));
+    };
+
     const activeFilterCount = useMemo(() => {
         return Object.values(activeFilters).filter((v) => v !== "" && v !== null).length;
     }, [activeFilters]);
@@ -40,6 +45,7 @@ export function useFilters() {
         setPending,
         applyFilters,
         resetFilters,
+        clearFilter,
         activeFilterCount,
         panelOpen,
         setPanelOpen,
