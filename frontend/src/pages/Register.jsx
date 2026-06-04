@@ -3,6 +3,7 @@ import { Box, Typography, TextField, Button, Alert } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../firebase";
+import { authPageWrapperSx, authCardSx, textFieldSx } from "../styles/styles";
 
 function Register() {
   const [displayName, setDisplayName] = useState("");
@@ -28,8 +29,8 @@ function Register() {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "background.default", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <Box sx={{ width: "100%", maxWidth: 400, p: 4, border: "1px solid", borderColor: "primary.main", borderRadius: "12px" }}>
+    <Box sx={authPageWrapperSx}>
+      <Box sx={authCardSx}>
         <Typography variant="h4" sx={{ color: "text.primary", fontWeight: 700, mb: 1 }}>
           Register
         </Typography>
@@ -45,7 +46,7 @@ function Register() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             fullWidth
-            sx={{ input: { color: "text.primary" }, label: { color: "text.secondary" } }}
+            sx={textFieldSx}
           />
           <TextField
             label="Email"
@@ -53,7 +54,7 @@ function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
-            sx={{ input: { color: "text.primary" }, label: { color: "text.secondary" } }}
+            sx={textFieldSx}
           />
           <TextField
             label="Password"
@@ -61,7 +62,7 @@ function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             fullWidth
-            sx={{ input: { color: "text.primary" }, label: { color: "text.secondary" } }}
+            sx={textFieldSx}
           />
           <TextField
             label="Confirm Password"
@@ -69,7 +70,7 @@ function Register() {
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             fullWidth
-            sx={{ input: { color: "text.primary" }, label: { color: "text.secondary" } }}
+            sx={textFieldSx}
           />
           <Button onClick={handleRegister} color="primary" fullWidth>
             Register

@@ -6,6 +6,7 @@ import { useFilters } from "../hooks/useFilters";
 import RecipeCard from "../components/RecipeCard";
 import FilterPanel from "../components/FilterPanel";
 import ActiveFilterChips from "../components/ActiveFilterChips";
+import { pageWrapperSx, textFieldSx } from "../styles/styles";
 
 function Recipes() {
     const {
@@ -34,17 +35,16 @@ function Recipes() {
     } = useRecipes(activeFilters);
 
     return (
-        <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", px: 4, py: 4 }}>
+        <Box sx={pageWrapperSx}>
 
             {/* Toggle */}
             <Tabs
                 value={tab}
                 onChange={(e, newVal) => setTab(newVal)}
                 sx={{ mb: 3 }}
-                TabIndicatorProps={{ style: { backgroundColor: "#7AE2CF" } }}
             >
-                <Tab label="Official Recipes" value="official" sx={{ color: "text.secondary", "&.Mui-selected": { color: "text.primary" } }} />
-                <Tab label="User Recipes" value="user" sx={{ color: "text.secondary", "&.Mui-selected": { color: "text.primary" } }} />
+                <Tab label="Official Recipes" value="official" />
+                <Tab label="User Recipes" value="user" />
             </Tabs>
 
             {/* Search + Filter Row */}
@@ -54,13 +54,7 @@ function Recipes() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     fullWidth
-                    sx={{
-                        input: { color: "text.primary" },
-                        "& .MuiOutlinedInput-root": {
-                            "& fieldset": { borderColor: "primary.main" },
-                            "&:hover fieldset": { borderColor: "primary.light" },
-                        }
-                    }}
+                    sx={textFieldSx}
                 />
                 <FilterPanel
                     pendingFilters={pendingFilters}

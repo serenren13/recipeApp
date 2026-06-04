@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import RecipeCard from "../components/RecipeCard";
 import { getOfficialRecipes } from "../api/recipeApi";
+import { pageWrapperSx, sectionHeaderSx } from "../styles/styles";
 
 function Home() {
 
@@ -26,7 +27,7 @@ function Home() {
    }, []);
 
   return (
-    <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", px: 4, py: 6 }}>
+    <Box sx={{ ...pageWrapperSx, py: 6 }}>
       
       {/* Hero Section */}
       <Box sx={{ mb: 6 }}>
@@ -52,7 +53,7 @@ function Home() {
 
       {/* Trending Recipes Section */}
       <Box sx={{ mb: 6 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Box sx={{ ...sectionHeaderSx, mb: 2 }}>
           <Typography variant="h5" sx={{ color: "text.primary", fontWeight: 600 }}>
             Trending Recipes
           </Typography>
@@ -85,7 +86,7 @@ function Home() {
 
       {/* Community Recipes - placeholder until Firestore is set up */}
       <Box sx={{ mb: 6 }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Box sx={{ ...sectionHeaderSx, mb: 2 }}>
           <Typography variant="h5" sx={{ color: "text.primary", fontWeight: 600 }}>
             Community Recipes
           </Typography>
