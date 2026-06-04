@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, onSnapshot, query, where, getDoc, doc } from "firebase/firestore";
+import {
+    collection,
+    onSnapshot,
+    query,
+    where,
+    getDoc,
+    doc
+} from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { getOfficialRecipeById } from "../api/recipeApi";
 
@@ -10,6 +17,8 @@ export function useMyRecipes() {
     const [tab, setTab] = useState("saved");
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
+
+    const [sortOrder, setSortOrder] = useState("newest");
 
     const [recipes, setRecipes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -58,16 +67,23 @@ export function useMyRecipes() {
         // -------------------
         if (tab === "saved") {
             unsub = onSnapshot(
-                collection(db, "users", user.uid, "savedRecipes"),
+                query(collection(db, "users", user.uid, "savedRecipes")),
                 async (snap) => {
                     try {
                         const refs = snap.docs.map(d => d.data());
 
                         const full = await Promise.all(
                             refs.map(async (r) => {
+
                                 if (r.source === "api") {
                                     const api = await getOfficialRecipeById(r.recipeId);
-                                    return { ...api, id: r.recipeId, source: "api" };
+
+                                    return {
+                                        ...api,
+                                        id: r.recipeId,
+                                        source: "api",
+                                        savedAt: r.savedAt || null
+                                    };
                                 }
 
                                 const fsDoc = await getDoc(doc(db, "recipes", r.recipeId));
@@ -76,7 +92,8 @@ export function useMyRecipes() {
                                 return {
                                     id: fsDoc.id,
                                     ...fsDoc.data(),
-                                    source: "user"
+                                    source: "user",
+                                    savedAt: r.savedAt || null
                                 };
                             })
                         );
@@ -94,9 +111,32 @@ export function useMyRecipes() {
         return () => unsub?.();
     }, [user?.uid, tab]);
 
-    const filtered = recipes.filter(r =>
+    // -------------------
+    // SEARCH
+    // -------------------
+    let filtered = recipes.filter(r =>
         (r.title || "").toLowerCase().includes(search.toLowerCase())
     );
+
+    // -------------------
+    // SORT (FIXED)
+    // -------------------
+    filtered = filtered.sort((a, b) => {
+
+        const getTime = (r) => {
+            if (tab === "saved") {
+                return r.savedAt?.seconds ?? 0;     // ✅ saved time
+            }
+            return r.createdAt?.seconds ?? 0;       // ✅ created time
+        };
+
+        const aTime = getTime(a);
+        const bTime = getTime(b);
+
+        return sortOrder === "newest"
+            ? bTime - aTime
+            : aTime - bTime;
+    });
 
     const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
 
@@ -115,6 +155,8 @@ export function useMyRecipes() {
         setTab,
         page,
         setPage,
-        totalPages
+        totalPages,
+        sortOrder,
+        setSortOrder
     };
 }

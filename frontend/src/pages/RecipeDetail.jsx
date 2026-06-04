@@ -22,6 +22,7 @@ import { db } from '../firebase';
 import CommentsSection from '../components/CommentsSection';
 import RecipeChat from '../components/RecipeChat';
 import { useAuth } from '../context/AuthContext';
+import { deleteDoc } from 'firebase/firestore';
 
 export default function RecipeDetail() {
   const { id } = useParams();
@@ -39,54 +40,92 @@ export default function RecipeDetail() {
   // LOAD RECIPE
   // -----------------------
   useEffect(() => {
+  let isMounted = true;
+
+  const loadRecipe = async () => {
     setLoading(true);
     setError(null);
 
     const isOfficial = /^\d+$/.test(id);
+    setIsUserRecipe(!isOfficial);
 
-    if (isOfficial) {
-      setIsUserRecipe(false);
+    try {
+      let data;
 
-      getOfficialRecipeById(id)
-        .then(setRecipe)
-        .catch((err) => setError(err.message))
-        .finally(() => setLoading(false));
+      // -----------------------
+      // OFFICIAL RECIPE
+      // -----------------------
+      if (isOfficial) {
+        data = await getOfficialRecipeById(id);
 
-    } else {
-      setIsUserRecipe(true);
+        if (!isMounted) return;
 
-      getDoc(doc(db, 'recipes', id))
-        .then((snap) => {
-          if (!snap.exists()) throw new Error('Recipe not found.');
+        setRecipe(data);
+      }
 
-          const data = snap.data();
+      // -----------------------
+      // USER RECIPE (Firestore)
+      // -----------------------
+      else {
+        const snap = await getDoc(doc(db, 'recipes', id));
 
-          setRecipe({
-            id: snap.id,
-            title: data.title,
-            imageUrl: data.imageUrl,
-            ingredients: typeof data.ingredients === 'string'
-              ? data.ingredients.split('\n').filter(Boolean)
-              : data.ingredients || [],
-            instructions: typeof data.instructions === 'string'
-              ? data.instructions.split('\n').filter(Boolean)
-              : data.instructions || [],
-            authorName: data.authorName || 'Unknown',
-            status: data.status,
-            prepTimeMinutes: data.prepTimeMinutes,
-            cookTimeMinutes: data.cookTimeMinutes,
-            difficulty: data.difficulty,
-            servings: data.servings,
-            caloriesPerServing: data.caloriesPerServing,
-            rating: data.rating,
-            reviewCount: data.reviewCount,
-            cuisine: data.cuisine,
-          });
-        })
-        .catch((err) => setError(err.message))
-        .finally(() => setLoading(false));
+        if (!snap.exists()) {
+          throw new Error('Recipe not found.');
+        }
+
+        const d = snap.data();
+
+        if (!isMounted) return;
+
+        setRecipe({
+          id: snap.id,
+          title: d.title,
+          imageUrl: d.imageUrl,
+          ingredients: typeof d.ingredients === 'string'
+            ? d.ingredients.split('\n').filter(Boolean)
+            : d.ingredients || [],
+          instructions: typeof d.instructions === 'string'
+            ? d.instructions.split('\n').filter(Boolean)
+            : d.instructions || [],
+          authorName: d.authorName || 'Unknown',
+          status: d.status,
+          prepTimeMinutes: d.prepTimeMinutes,
+          cookTimeMinutes: d.cookTimeMinutes,
+          difficulty: d.difficulty,
+          servings: d.servings,
+          caloriesPerServing: d.caloriesPerServing,
+          rating: d.rating,
+          reviewCount: d.reviewCount,
+          cuisine: d.cuisine,
+        });
+      }
+
+      // -----------------------
+      // CHECK IF SAVED (ONLY IF USER LOGGED IN)
+      // -----------------------
+      if (user && isMounted) {
+        const savedRef = collection(db, 'users', user.uid, 'savedRecipes');
+        const q = query(savedRef, where('recipeId', '==', id));
+        const snap = await getDocs(q);
+
+        if (!isMounted) return;
+
+        setSaved(!snap.empty);
+      }
+
+    } catch (err) {
+      if (isMounted) setError(err.message);
+    } finally {
+      if (isMounted) setLoading(false);
     }
-  }, [id]);
+  };
+
+  loadRecipe();
+
+  return () => {
+    isMounted = false;
+  };
+}, [id, user]);
 
   // -----------------------
   // SAVE RECIPE
@@ -122,6 +161,34 @@ export default function RecipeDetail() {
       setSaving(false);
     }
   };
+
+
+  const handleUnsave = async () => {
+  if (!user) return;
+
+  try {
+    setSaving(true);
+
+    const savedRef = collection(db, 'users', user.uid, 'savedRecipes');
+
+    const q = query(savedRef, where('recipeId', '==', id));
+    const snap = await getDocs(q);
+
+    if (snap.empty) return;
+
+    // delete all matching docs (should usually be 1)
+    await Promise.all(
+      snap.docs.map((docSnap) => deleteDoc(docSnap.ref))
+    );
+
+    setSaved(false);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   // -----------------------
   // LOADING / ERROR
@@ -181,18 +248,24 @@ export default function RecipeDetail() {
       {/* Save Button */}
       <Box sx={{ px: { xs: 2, md: 6 }, mt: 2 }}>
         <Button
-          onClick={handleSave}
-          disabled={saving || saved}
+          onClick={saved ? handleUnsave : handleSave}
+          disabled={saving}
           variant="contained"
           sx={{
-            backgroundColor: saved ? '#7AE2CF' : '#077A7D',
+            backgroundColor: saved ? '#e57373' : '#077A7D',
             color: '#06202B',
             fontWeight: 700,
-            '&:hover': { backgroundColor: '#7AE2CF' }
+            '&:hover': {
+              backgroundColor: saved ? '#ef5350' : '#7AE2CF'
+            }
           }}
-        >
-          {saved ? 'Saved ✓' : saving ? 'Saving...' : 'Save Recipe'}
-        </Button>
+>
+  {saving
+    ? 'Processing...'
+    : saved
+    ? 'Unsave Recipe'
+    : 'Save Recipe'}
+</Button>
       </Box>
 
       {/* Image */}
