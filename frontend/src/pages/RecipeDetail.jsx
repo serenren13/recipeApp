@@ -17,6 +17,7 @@ import { getOfficialRecipeById } from '../api/recipeApi';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import CommentsSection from '../components/CommentsSection';
+import RecipeChat from '../components/RecipeChat';
 
 export default function RecipeDetail() {
   const { id } = useParams();
@@ -201,6 +202,8 @@ export default function RecipeDetail() {
         <Divider sx={{ borderColor: '#077A7D', mb: 4 }} />
         <CommentsSection recipeKey={isUserRecipe ? `user_${id}` : `official_${id}`} />
       </Box>
+
+      <RecipeChat recipe={recipe} />
 
     </Box>
   );
