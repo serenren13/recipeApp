@@ -5,6 +5,7 @@ import { useRecipes } from "../hooks/useRecipes";
 import { useFilters } from "../hooks/useFilters";
 import RecipeCard from "../components/RecipeCard";
 import FilterPanel from "../components/FilterPanel";
+import ActiveFilterChips from "../components/ActiveFilterChips";
 
 function Recipes() {
     const {
@@ -13,6 +14,7 @@ function Recipes() {
         setPending,
         applyFilters,
         resetFilters,
+        clearFilter,
         activeFilterCount,
         panelOpen,
         setPanelOpen,
@@ -70,6 +72,8 @@ function Recipes() {
                     setPanelOpen={setPanelOpen}
                 />
             </Box>
+
+            <ActiveFilterChips activeFilters={activeFilters} clearFilter={clearFilter} />
 
             {/* Error */}
             {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
