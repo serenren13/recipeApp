@@ -2,13 +2,40 @@ import { Box, Typography, TextField, Tab, Tabs, Grid, Pagination, CircularProgre
 import AddIcon from "@mui/icons-material/Add";
 import { Link } from "react-router-dom";
 import { useRecipes } from "../hooks/useRecipes";
+import { useFilters } from "../hooks/useFilters";
 import RecipeCard from "../components/RecipeCard";
+import FilterPanel from "../components/FilterPanel";
+import ActiveFilterChips from "../components/ActiveFilterChips";
+import { pageWrapperSx, textFieldSx } from "../styles/styles";
 
 function Recipes() {
-    const { recipes, loading, error, search, setSearch, tab, setTab, page, setPage, totalPages } = useRecipes();
+    const {
+        activeFilters,
+        pendingFilters,
+        setPending,
+        applyFilters,
+        resetFilters,
+        clearFilter,
+        activeFilterCount,
+        panelOpen,
+        setPanelOpen,
+    } = useFilters();
+
+    const { 
+        recipes, 
+        loading, 
+        error, 
+        search, 
+        setSearch, 
+        tab, 
+        setTab, 
+        page, 
+        setPage, 
+        totalPages 
+    } = useRecipes(activeFilters);
 
     return (
-        <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", px: 4, py: 4 }}>
+        <Box sx={pageWrapperSx}>
 
             {/* Toggle */}
             <Tabs
@@ -17,25 +44,31 @@ function Recipes() {
                 sx={{ mb: 3 }}
                 slotProps={{ style: { backgroundColor: "#7AE2CF" } }}
             >
-                <Tab label="Official Recipes" value="official" sx={{ color: "text.secondary", "&.Mui-selected": { color: "text.primary" } }} />
-                <Tab label="User Recipes" value="user" sx={{ color: "text.secondary", "&.Mui-selected": { color: "text.primary" } }} />
+                <Tab label="Official Recipes" value="official" />
+                <Tab label="User Recipes" value="user" />
             </Tabs>
 
-            {/* Search */}
-            <TextField
-                placeholder="Search recipes..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                fullWidth
-                sx={{
-                    mb: 4,
-                    input: { color: "text.primary" },
-                    "& .MuiOutlinedInput-root": {
-                        "& fieldset": { borderColor: "primary.main" },
-                        "&:hover fieldset": { borderColor: "primary.light" },
-                    }
-                }}
-            />
+            {/* Search + Filter Row */}
+            <Box sx={{ display: "flex", gap: 2, mb: 4, alignItems: "center" }}>
+                <TextField
+                    placeholder="Search recipes..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    fullWidth
+                    sx={textFieldSx}
+                />
+                <FilterPanel
+                    pendingFilters={pendingFilters}
+                    setPending={setPending}
+                    applyFilters={applyFilters}
+                    resetFilters={resetFilters}
+                    activeFilterCount={activeFilterCount}
+                    panelOpen={panelOpen}
+                    setPanelOpen={setPanelOpen}
+                />
+            </Box>
+
+            <ActiveFilterChips activeFilters={activeFilters} clearFilter={clearFilter} />
 
             {/* Error */}
             {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}

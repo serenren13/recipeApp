@@ -42,4 +42,14 @@ async function getOfficialTags(req, res, next) {
   }
 }
 
-module.exports = { getOfficialRecipes, getOfficialRecipeById, getOfficialTags };
+// GET /api/recipes/official/cuisines
+async function getOfficialCuisines(req, res, next) {
+  try {
+    const cuisines = await recipeService.getOfficialCuisines();
+    res.json(cuisines);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { getOfficialRecipes, getOfficialRecipeById, getOfficialTags, getOfficialCuisines };

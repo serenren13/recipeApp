@@ -43,8 +43,8 @@ function RecipeCard({ id, title, imageUrl, cookTimeMinutes, difficulty, rating, 
         ) : (
           <>
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-              <Chip label={cuisine} size="small" sx={{ backgroundColor: "primary.main", color: "secondary.main" }} />
-              <Chip label={difficulty} size="small" sx={{ backgroundColor: "primary.dark", color: "text.primary" }} />
+                {cuisine && <Chip label={cuisine} size="small" sx={{ backgroundColor: "primary.main", color: "secondary.main" }} />}
+                {difficulty && <Chip label={difficulty} size="small" sx={{ backgroundColor: "primary.dark", color: "text.primary" }} />}
             </Box>
             <Box sx={{ display: "flex", justifyContent: "space-between", mt: "auto" }}>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>⏱ {cookTimeMinutes} mins</Typography>
