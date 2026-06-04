@@ -64,7 +64,7 @@ export default function CreateRecipe() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#095154' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#06202B' }}>
 
       <Box
         sx={{
