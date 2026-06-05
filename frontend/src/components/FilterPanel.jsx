@@ -105,7 +105,7 @@ export default function FilterPanel({
                                 onClick={() => setPending("mealType", m.toLowerCase())}
                                 variant={pendingFilters.mealType === m.toLowerCase() ? "filled" : "outlined"}
                                 size="small"
-                                sx={pendingFilters.mealType === m.toLowerCase ? chipActiveSx : chipOutlinedSx}
+                                sx={pendingFilters.mealType === m.toLowerCase() ? chipActiveSx : chipOutlinedSx}
                             />
                         ))}
                     </Box>
