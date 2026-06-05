@@ -233,8 +233,9 @@ VITE_FIREBASE_APP_ID=your_firebase_app_id
 ## Project Resources
 
 - [GitHub Repo](https://github.com/serenren13/recipeApp)
-- [Trello Board](#) *(add link)*
-- [Full Assignment Details](#) *(add link)*
+- [Trello Board](https://trello.com/invite/b/6a1d8db7adb15954b6008698/ATTIe407f6d3a4996224009639185010ea3046BEDB80/launch-week-3-recipe-project) 
+- [Full Assignment Details](https://docs.google.com/document/d/17TzLeTb7ENPdFuAcRG3pqduJZlvWrMOBAXaawChZkT4/edit?usp=sharing)
+- [Figma](https://www.figma.com/design/Za6iEGnW9MDB1Zy5SDiOcm/Week3-Project?node-id=0-1&t=foMkhk5JGn5hlAET-1)
 
 ---
 
