@@ -53,7 +53,7 @@ export default function FilterPanel({
                     sx={{
                         position: "absolute",
                         top: "calc(100% + 8px)",
-                        left: 0,
+                        right: 0,
                         zIndex: 100,
                         width: 360,
                         p: 3,
@@ -140,7 +140,10 @@ export default function FilterPanel({
                             value={pendingFilters.rating ?? 0}
                             precision={0.5}
                             onChange={(e, val) => setPending("rating", val)}
-                            sx={{ color: "secondary.main" }}
+                            sx={{
+                                color: "secondary.main",
+                                "& .MuiRating-iconEmpty": { color: "#7AE2CF" },
+                            }}
                         />
                         {pendingFilters.rating && (
                             <Typography variant="caption" sx={{ color: "text.secondary", ml: 1 }}>
