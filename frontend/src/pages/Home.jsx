@@ -92,7 +92,13 @@ function Home() {
         {loadingTrending ? (
           <CircularProgress />
         ) : (
-          <Box sx={{ display: "flex", gap: 2, overflowX: "auto" }}>
+          <Box sx={{
+            display: "flex", gap: 2, overflowX: "auto", pb: 1,
+            "&::-webkit-scrollbar": { height: 6 },
+            "&::-webkit-scrollbar-track": { backgroundColor: "#06202B", borderRadius: 4 },
+            "&::-webkit-scrollbar-thumb": { backgroundColor: "#077A7D", borderRadius: 4 },
+            "&::-webkit-scrollbar-thumb:hover": { backgroundColor: "#7AE2CF" },
+          }}>
             {trending.map(recipe => (
               <Box key={recipe.id} sx={{ minWidth: 220 }}>
                 <RecipeCard {...recipe} isUserRecipe={false} />
@@ -120,7 +126,13 @@ function Home() {
             No community recipes yet.
           </Typography>
         ) : (
-          <Box sx={{ display: "flex", gap: 2, overflowX: "auto" }}>
+          <Box sx={{
+            display: "flex", gap: 2, overflowX: "auto", pb: 1,
+            "&::-webkit-scrollbar": { height: 6 },
+            "&::-webkit-scrollbar-track": { backgroundColor: "#06202B", borderRadius: 4 },
+            "&::-webkit-scrollbar-thumb": { backgroundColor: "#077A7D", borderRadius: 4 },
+            "&::-webkit-scrollbar-thumb:hover": { backgroundColor: "#7AE2CF" },
+          }}>
             {community.map(recipe => (
               <Box key={recipe.id} sx={{ minWidth: 220 }}>
                 <RecipeCard
