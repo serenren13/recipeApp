@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Box, Button, IconButton } from "@mui/material";
+import { AppBar, Toolbar, Box, Button, IconButton, Typography } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -13,7 +13,17 @@ function Navbar() {
       <Toolbar sx={{ justifyContent: "space-between" }}>
         {/* Logo */}
         <Box component={Link} to="/" sx={{ textDecoration: "none" }}>
-          🍴 
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+              color: "#7AE2CF",
+              "& span": { color: "#FDEB9E" },
+            }}
+          >
+            Food <span>Connect</span>
+          </Typography>
         </Box>
 
         {/* Nav Links */}
