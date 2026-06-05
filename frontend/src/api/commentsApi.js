@@ -5,6 +5,7 @@ import {
   getDocs,
   doc,
   updateDoc,
+  deleteDoc,
   arrayUnion,
   arrayRemove,
   serverTimestamp,
@@ -57,6 +58,10 @@ export async function toggleCommentUpvote(recipeKey, commentId, userId) {
   });
 }
 
+export async function deleteComment(recipeKey, commentId) {
+  return deleteDoc(commentDoc(recipeKey, commentId));
+}
+
 // ─── Replies ─────────────────────────────────────────────────────────────────
 
 // Returns replies for a comment, sorted by upvote count descending
@@ -76,6 +81,10 @@ export async function addReply(recipeKey, commentId, { userId, userEmail, text }
     upvotedBy: [],
     timestamp: serverTimestamp(),
   });
+}
+
+export async function deleteReply(recipeKey, commentId, replyId) {
+  return deleteDoc(replyDoc(recipeKey, commentId, replyId));
 }
 
 // Toggle upvote on a reply

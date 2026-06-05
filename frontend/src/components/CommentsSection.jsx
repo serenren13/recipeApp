@@ -11,9 +11,15 @@ import {
   IconButton,
   Collapse,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ReplyIcon from '@mui/icons-material/Reply';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import { useAuth } from '../context/AuthContext';
 import {
   getComments,
@@ -22,6 +28,8 @@ import {
   getReplies,
   addReply,
   toggleReplyUpvote,
+  deleteComment,
+  deleteReply,
 } from '../api/commentsApi';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -42,9 +50,36 @@ function initials(email) {
 }
 
 
-function ReplyItem({ reply, recipeKey, commentId, currentUser, onUpvote }) {
+function ConfirmDeleteDialog({ open, onClose, onConfirm, label }) {
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      PaperProps={{ sx: { backgroundColor: '#06202B', border: '1px solid #077A7D', borderRadius: '12px' } }}
+    >
+      <DialogTitle sx={{ color: '#FDEB9E', fontWeight: 700 }}>Delete {label}?</DialogTitle>
+      <DialogContent>
+        <DialogContentText sx={{ color: '#7AE2CF' }}>
+          This action cannot be undone. Are you sure you want to delete this {label}?
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button onClick={onClose} variant="outlined" size="small" sx={{ borderColor: '#7AE2CF', color: '#7AE2CF' }}>
+          Cancel
+        </Button>
+        <Button onClick={onConfirm} size="small" sx={{ bgcolor: '#b00020', color: '#fff', '&:hover': { bgcolor: '#e53935' } }}>
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
+function ReplyItem({ reply, recipeKey, commentId, currentUser, onUpvote, onDelete }) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const hasUpvoted = currentUser && reply.upvotedBy?.includes(currentUser.uid);
   const upvoteCount = reply.upvotedBy?.length ?? 0;
+  const isOwner = currentUser && currentUser.uid === reply.userId;
 
   return (
     <Box
@@ -68,6 +103,11 @@ function ReplyItem({ reply, recipeKey, commentId, currentUser, onUpvote }) {
           <Typography variant="caption" sx={{ color: '#7AE2CF', opacity: 0.5 }}>
             {formatDate(reply.timestamp)}
           </Typography>
+          {isOwner && (
+            <IconButton size="small" onClick={() => setConfirmOpen(true)} sx={{ color: '#b00020', p: 0.25, ml: 'auto' }}>
+              <DeleteOutlineIcon sx={{ fontSize: 14 }} />
+            </IconButton>
+          )}
         </Box>
         <Typography variant="body2" sx={{ color: '#FDEB9E', lineHeight: 1.6 }}>
           {reply.text}
@@ -84,22 +124,30 @@ function ReplyItem({ reply, recipeKey, commentId, currentUser, onUpvote }) {
           <Typography variant="caption" sx={{ color: '#7AE2CF' }}>{upvoteCount}</Typography>
         </Box>
       </Box>
+      <ConfirmDeleteDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => { setConfirmOpen(false); onDelete(reply.id); }}
+        label="reply"
+      />
     </Box>
   );
 }
 
 // Comment Item
 
-function CommentItem({ comment, recipeKey, currentUser, onCommentUpvote }) {
+function CommentItem({ comment, recipeKey, currentUser, onCommentUpvote, onCommentDelete }) {
   const [showReplies, setShowReplies] = useState(false);
   const [replies, setReplies] = useState([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [submittingReply, setSubmittingReply] = useState(false);
   const [showReplyInput, setShowReplyInput] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const hasUpvoted = currentUser && comment.upvotedBy?.includes(currentUser.uid);
   const upvoteCount = comment.upvotedBy?.length ?? 0;
+  const isOwner = currentUser && currentUser.uid === comment.userId;
 
   const loadReplies = async () => {
     setLoadingReplies(true);
@@ -136,6 +184,12 @@ function CommentItem({ comment, recipeKey, currentUser, onCommentUpvote }) {
     setReplies(updated);
   };
 
+  const handleDeleteReply = async (replyId) => {
+    await deleteReply(recipeKey, comment.id, replyId);
+    const updated = await getReplies(recipeKey, comment.id);
+    setReplies(updated);
+  };
+
   return (
     <Box
       sx={{
@@ -147,11 +201,11 @@ function CommentItem({ comment, recipeKey, currentUser, onCommentUpvote }) {
       }}
     >
       {/* Comment header */}
-      <Box sx={{ display: 'flex', gap: 1.5, mb: 1 }}>
+      <Box sx={{ display: 'flex', gap: 1.5, mb: 1, alignItems: 'flex-start' }}>
         <Avatar sx={{ width: 36, height: 36, fontSize: '0.75rem', bgcolor: '#077A7D', color: '#FDEB9E' }}>
           {initials(comment.userEmail)}
         </Avatar>
-        <Box>
+        <Box sx={{ flex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" fontWeight={600} sx={{ color: '#7AE2CF' }}>
               {userLabel(comment.userEmail)}
@@ -164,6 +218,11 @@ function CommentItem({ comment, recipeKey, currentUser, onCommentUpvote }) {
             <Rating value={comment.rating} readOnly size="small" sx={{ '& .MuiRating-iconFilled': { color: '#FDEB9E' } }} />
           )}
         </Box>
+        {isOwner && (
+          <IconButton size="small" onClick={() => setConfirmOpen(true)} sx={{ color: '#b00020', p: 0.5 }}>
+            <DeleteOutlineIcon sx={{ fontSize: 18 }} />
+          </IconButton>
+        )}
       </Box>
 
       {/* Comment text */}
@@ -194,6 +253,7 @@ function CommentItem({ comment, recipeKey, currentUser, onCommentUpvote }) {
         >
           Reply
         </Button>
+
 
         {replies.length > 0 || showReplies ? (
           <Button
@@ -257,11 +317,19 @@ function CommentItem({ comment, recipeKey, currentUser, onCommentUpvote }) {
                 commentId={comment.id}
                 currentUser={currentUser}
                 onUpvote={handleUpvoteReply}
+                onDelete={handleDeleteReply}
               />
             ))
           )}
         </Box>
       </Collapse>
+
+      <ConfirmDeleteDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => { setConfirmOpen(false); onCommentDelete(comment.id); }}
+        label="comment"
+      />
     </Box>
   );
 }
@@ -317,6 +385,11 @@ export default function CommentsSection({ recipeKey }) {
   const handleCommentUpvote = async (commentId) => {
     if (!user) return;
     await toggleCommentUpvote(recipeKey, commentId, user.uid);
+    await loadComments();
+  };
+
+  const handleCommentDelete = async (commentId) => {
+    await deleteComment(recipeKey, commentId);
     await loadComments();
   };
 
@@ -417,6 +490,7 @@ export default function CommentsSection({ recipeKey }) {
               recipeKey={recipeKey}
               currentUser={user}
               onCommentUpvote={handleCommentUpvote}
+              onCommentDelete={handleCommentDelete}
             />
           ))}
         </Box>
