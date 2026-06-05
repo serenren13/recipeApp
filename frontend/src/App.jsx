@@ -7,8 +7,8 @@ import SignIn from './pages/SignIn';
 import Register from './pages/Register';
 import CreateRecipe from './pages/CreateRecipe';
 import AdminPage from './pages/Admin';
-import RecipeDetail from './pages/RecipeDetail';
 import Recipes from './pages/Recipes';
+import RecipeDetail from './pages/RecipeDetail';
 
 function App() {
   return (
@@ -21,18 +21,9 @@ function App() {
 
         <Route path="/recipes/:id" element={<RecipeDetail />} />
         <Route path="/recipes" element={<Recipes />} />
-
         <Route path="/create-recipe" element={<CreateRecipe />} />
         <Route path="/admin" element={<AdminPage />} />
-
-        <Route
-          path="/my-recipes"
-          element={
-            <ProtectedRoute>
-              <MyRecipes />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/my-recipes" element={<MyRecipes />} />
       </Routes>
     </>
   );

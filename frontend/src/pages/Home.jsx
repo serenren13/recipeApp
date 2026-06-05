@@ -4,101 +4,143 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import RecipeCard from "../components/RecipeCard";
 import { getOfficialRecipes } from "../api/recipeApi";
-import { pageWrapperSx, sectionHeaderSx } from "../styles/styles";
+
+import { db } from "../firebase";
+import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 
 function Home() {
 
-   const { user } = useAuth();
-   const [trending, setTrending] = useState([]);
-   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
-   useEffect(() => {
+  const [trending, setTrending] = useState([]);
+  const [community, setCommunity] = useState([]);
+  const [loadingTrending, setLoadingTrending] = useState(true);
+  const [loadingCommunity, setLoadingCommunity] = useState(true);
+
+  // -------------------------
+  // TRENDING
+  // -------------------------
+  useEffect(() => {
     const fetchTrending = async () => {
       try {
         const data = await getOfficialRecipes({ limit: 10 });
-        setTrending(data.recipes);
+        setTrending(data.recipes || []);
       } catch (err) {
-        console.error("Failed to fetch trending recipes", err);
+        console.error(err);
       } finally {
-        setLoading(false);
+        setLoadingTrending(false);
       }
     };
+
     fetchTrending();
-   }, []);
+  }, []);
+
+  // -------------------------
+  // COMMUNITY
+  // -------------------------
+  useEffect(() => {
+    const fetchCommunity = async () => {
+      try {
+        const q = query(
+          collection(db, "recipes"),
+          orderBy("createdAt", "desc"),
+          limit(10)
+        );
+
+        const snap = await getDocs(q);
+
+        const data = snap.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            source: "user"
+          }))
+          .filter(r => r.status === "published")
+
+        setCommunity(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingCommunity(false);
+      }
+    };
+
+    fetchCommunity();
+  }, []);
 
   return (
-    <Box sx={{ ...pageWrapperSx, py: 6 }}>
-      
-      {/* Hero Section */}
+    <Box sx={{ backgroundColor: "background.default", minHeight: "100vh", px: 4, py: 6 }}>
+
+      {/* HERO */}
       <Box sx={{ mb: 6 }}>
-        <Typography variant="h3" sx={{ color: "text.primary", fontWeight: 700, mb: 1 }}>
+        <Typography variant="h3" sx={{ fontWeight: 700 }}>
           {user ? `Welcome Back, ${user.displayName || "Chef"}!` : "Welcome to Food Connect"}
         </Typography>
-        <Typography variant="body1" sx={{ color: "text.secondary", mb: 3 }}>
-          {user
-            ? "Pick up where you left off."
-            : "Discover recipes, save your favorites, and share your own."}
-        </Typography>
-        {!user && (
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <Button component={Link} to="/register" color="primary">
-              Get Started
-            </Button>
-            <Button component={Link} to="/signin" variant="outlined" sx={{ color: "text.secondary", borderColor: "text.secondary" }}>
-              Sign In
-            </Button>
-          </Box>
-        )}
       </Box>
 
-      {/* Trending Recipes Section */}
+      {/* TRENDING */}
       <Box sx={{ mb: 6 }}>
-        <Box sx={{ ...sectionHeaderSx, mb: 2 }}>
-          <Typography variant="h5" sx={{ color: "text.primary", fontWeight: 600 }}>
-            Trending Recipes
-          </Typography>
-          <Button component={Link} to="/recipes" color="secondary" size="small">
+
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="h5">Trending Recipes</Typography>
+
+          <Button component={Link} to="/recipes" size="small">
             See All →
           </Button>
         </Box>
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress sx={{ color: "primary.main" }} />
-          </Box>
+
+        {loadingTrending ? (
+          <CircularProgress />
         ) : (
-        <Box sx={{ display: "flex", gap: 2, overflowX: "auto", pb: 1 }}>
-          {trending.map((recipe) => (
-            <Box key={recipe.id} sx={{ minWidth: 220, flexShrink: 0 }}>
-              <RecipeCard
-                id={recipe.id}
-                title={recipe.title}
-                imageUrl={recipe.imageUrl}
-                cookTimeMinutes={recipe.cookTimeMinutes}
-                difficulty={recipe.difficulty}
-                rating={recipe.rating}
-                cuisine={recipe.cuisine}
-              />
-            </Box>
-          ))}
-        </Box>
+          <Box sx={{ display: "flex", gap: 2, overflowX: "auto" }}>
+            {trending.map(recipe => (
+              <Box key={recipe.id} sx={{ minWidth: 220 }}>
+                <RecipeCard {...recipe} isUserRecipe={false} />
+              </Box>
+            ))}
+          </Box>
         )}
       </Box>
 
-      {/* Community Recipes - placeholder until Firestore is set up */}
+      {/* COMMUNITY */}
       <Box sx={{ mb: 6 }}>
-        <Box sx={{ ...sectionHeaderSx, mb: 2 }}>
-          <Typography variant="h5" sx={{ color: "text.primary", fontWeight: 600 }}>
-            Community Recipes
-          </Typography>
-          <Button component={Link} to="/recipes" color="secondary" size="small">
+
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="h5">Community Recipes</Typography>
+
+          <Button component={Link} to="/recipes?tab=created" size="small">
             See All →
           </Button>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", py: 4 }}>
-          <Typography variant="body1" sx={{ color: "text.secondary" }}>
-            Community recipes coming soon!
+
+        {loadingCommunity ? (
+          <CircularProgress />
+        ) : community.length === 0 ? (
+          <Typography sx={{ color: "text.secondary" }}>
+            No community recipes yet.
           </Typography>
-        </Box>
+        ) : (
+          <Box sx={{ display: "flex", gap: 2, overflowX: "auto" }}>
+            {community.map(recipe => (
+              <Box key={recipe.id} sx={{ minWidth: 220 }}>
+                <RecipeCard
+                  id={recipe.id}
+                  title={recipe.title}
+                  imageUrl={recipe.imageUrl}
+                  cookTimeMinutes={recipe.cookTimeMinutes}
+                  difficulty={recipe.difficulty}
+                  cuisine={recipe.cuisine}
+                  isUserRecipe={true}
+                  authorName={recipe.authorName}
+                  status={recipe.status}
+                  averageRating={recipe.averageRating}
+                  ratingCount={recipe.ratingCount}
+                  commentCount={recipe.commentCount}
+                />
+              </Box>
+            ))}
+          </Box>
+        )}
       </Box>
 
     </Box>

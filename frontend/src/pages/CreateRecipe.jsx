@@ -34,6 +34,7 @@ export default function CreateRecipe() {
     setError('');
     try {
       const user = auth.currentUser;
+
       await addDoc(collection(db, 'recipes'), {
         title: form.title.trim(),
         ingredients: form.ingredients.trim(),
@@ -43,8 +44,10 @@ export default function CreateRecipe() {
         status: 'pending',
         createdAt: serverTimestamp(),
       });
+
       setSuccess(true);
       setForm({ title: '', ingredients: '', instructions: '' });
+
     } catch (err) {
       console.error(err);
       setError('Failed to submit recipe. Please try again.');
@@ -53,8 +56,15 @@ export default function CreateRecipe() {
     }
   };
 
+  // 🔥 NEW: Clear form
+  const handleClear = () => {
+    setForm({ title: '', ingredients: '', instructions: '' });
+    setError('');
+    setSuccess(false);
+  };
+
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#095154' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#06202B' }}>
 
       <Box
         sx={{
@@ -91,7 +101,7 @@ export default function CreateRecipe() {
               </Alert>
             )}
 
-            {/* Recipe Title */}
+            {/* Title */}
             <Typography variant="body2" fontWeight={600} mb={0.75}>
               Recipe Title
             </Typography>
@@ -102,9 +112,9 @@ export default function CreateRecipe() {
               fullWidth
               size="small"
               placeholder="e.g. Classic Spaghetti Carbonara"
-              sx={{ 
-                mb: 3, 
-                bgcolor: '#f0f0f0', 
+              sx={{
+                mb: 3,
+                bgcolor: '#f0f0f0',
                 borderRadius: 1,
                 '& input': { color: '#06202B !important' },
                 '& textarea': { color: '#06202B!important' },
@@ -123,9 +133,9 @@ export default function CreateRecipe() {
               multiline
               rows={5}
               placeholder={"e.g.\n200g spaghetti\n2 eggs\n100g pancetta\n50g parmesan"}
-              sx={{ 
-                mb: 3, 
-                bgcolor: '#f0f0f0', 
+              sx={{
+                mb: 3,
+                bgcolor: '#f0f0f0',
                 borderRadius: 1,
                 '& input': { color: '#06202B !important' },
                 '& textarea': { color: '#06202B!important' },
@@ -144,17 +154,39 @@ export default function CreateRecipe() {
               multiline
               rows={6}
               placeholder="Describe the steps to make this recipe..."
-              sx={{ 
-                mb: 3, 
-                bgcolor: '#f0f0f0', 
+              sx={{
+                mb: 3,
+                bgcolor: '#f0f0f0',
                 borderRadius: 1,
                 '& input': { color: '#06202B !important' },
                 '& textarea': { color: '#06202B!important' },
               }}
             />
 
-            {/* Submit button — right-aligned to match mockup */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {/* Buttons */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+              
+              {/* CLEAR BUTTON */}
+              <Button
+                onClick={handleClear}
+                variant="outlined"
+                sx={{
+                  borderColor: '#7AE2CF',
+                  color: '#7AE2CF',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  px: 3,
+                  borderRadius: 2,
+                  '&:hover': {
+                    borderColor: '#FDEB9E',
+                    color: '#FDEB9E',
+                  },
+                }}
+              >
+                Clear
+              </Button>
+
+              {/* SUBMIT BUTTON */}
               <Button
                 onClick={handleSubmit}
                 disabled={loading}
@@ -175,6 +207,7 @@ export default function CreateRecipe() {
                 {loading ? <CircularProgress size={20} color="inherit" /> : 'Submit for review'}
               </Button>
             </Box>
+
           </CardContent>
         </Card>
       </Box>

@@ -13,7 +13,7 @@ function Navbar() {
       <Toolbar sx={{ justifyContent: "space-between" }}>
         {/* Logo */}
         <Box component={Link} to="/" sx={{ textDecoration: "none" }}>
-          🍴
+          🍴 
         </Box>
 
         {/* Nav Links */}

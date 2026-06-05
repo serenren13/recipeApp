@@ -42,6 +42,7 @@ function Recipes() {
                 value={tab}
                 onChange={(e, newVal) => setTab(newVal)}
                 sx={{ mb: 3 }}
+                slotProps={{ style: { backgroundColor: "#7AE2CF" } }}
             >
                 <Tab label="Official Recipes" value="official" />
                 <Tab label="User Recipes" value="user" />
@@ -88,21 +89,24 @@ function Recipes() {
                 </Box>
             )}
 
-            {/* Grid */}
-            {!loading && !error && recipes.length > 0 && (
+           {!loading && !error && recipes.length > 0 && (
                 <Grid container spacing={3}>
                     {recipes.map((recipe) => (
-                        <Grid item xs={12} sm={6} md={4} key={recipe.id}>
-                            <RecipeCard
-                                id={recipe.id}
-                                title={recipe.title}
-                                imageUrl={recipe.imageUrl}
-                                cookTimeMinutes={recipe.cookTimeMinutes}
-                                difficulty={recipe.difficulty}
-                                rating={recipe.rating}
-                                cuisine={recipe.cuisine}
-                            />
-                        </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={recipe.id}>
+                        <RecipeCard
+                            id={recipe.id}
+                            title={recipe.title}
+                            imageUrl={recipe.imageUrl}
+                            cookTimeMinutes={recipe.cookTimeMinutes}
+                            difficulty={recipe.difficulty}
+                            rating={recipe.rating}
+                            cuisine={recipe.cuisine}
+                            isUserRecipe={tab === "user"}
+                            authorName={recipe.authorName}
+                            status={recipe.status}
+                        />
+
+                    </Grid>
                     ))}
                 </Grid>
             )}

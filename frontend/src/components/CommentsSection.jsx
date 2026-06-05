@@ -286,19 +286,33 @@ export default function CommentsSection({ recipeKey }) {
   }, [recipeKey]);
 
   const handleSubmit = async () => {
-    if (!newText.trim() || !newRating || !user) return;
+  if (!newText.trim() || !newRating || !user) return;
+
+  try {
     setSubmitting(true);
+
+    console.log('Posting comment...');
+
     await addComment(recipeKey, {
       userId: user.uid,
       userEmail: user.email,
       text: newText.trim(),
       rating: newRating,
     });
+
+    console.log('Comment added successfully');
+
     await loadComments();
+
     setNewText('');
     setNewRating(0);
+  } catch (error) {
+    console.error('Comment error:', error);
+    alert(error.message);
+  } finally {
     setSubmitting(false);
-  };
+  }
+};
 
   const handleCommentUpvote = async (commentId) => {
     if (!user) return;
