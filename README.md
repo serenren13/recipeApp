@@ -1,90 +1,142 @@
 # Food Connect 🍴
 
-A full-stack recipe app where users can browse official recipes, create and share their own, and get AI-powered cooking help.
+> **Food Connect** is a full-stack recipe app where users can browse official recipes,
+> create and share their own, and get AI-powered cooking help.
 
-## Team
-- Danny Zhang
-- Lina Gougil
-- Sohan Dadana
-- Serenity Phillips
+## Table of Contents
 
-## Tech Stack
-- **Frontend:** React + Vite, Material UI
-- **Backend:** Express / Node.js
-- **Database:** Firebase Firestore
-- **Recipe API:** DummyJSON
-- **AI:** OpenAI GPT-4o-mini
+- [Project Description](#project-description)
+- [Features](#features)
+- [Installation](#installation)
+- [External Setup](#external-setup)
+  - [Firebase Configuration](#firebase-configuration)
+  - [OpenAI Configuration](#openai-configuration)
+- [How to Use](#how-to-use)
+- [API Info](#api-info)
+- [Feature Status](#feature-status)
+- [Credits](#credits)
+- [Project Resources](#project-resources)
+
+---
+
+## Project Description
+
+Food Connect is a full-stack web application built with **React**, **Express**, and
+**Firebase** that brings recipes and community together in one place. The platform
+enables users to:
+
+- **Browse official recipes**: Search and filter thousands of recipes from DummyJSON
+  by cuisine, meal type, cook time, and rating
+- **Create and share**: Submit your own recipes for admin review and share them with
+  the community
+- **Get AI cooking help**: Chat with an AI assistant on any recipe page for tips,
+  substitutions, and guidance
+- **Manage your collection**: Save recipes and revisit your created and saved recipes
+  from one place
+- **Admin moderation**: Approve or reject user-submitted recipes through a dedicated
+  admin panel
+
+---
 
 ## Features
-- Browse official recipes with search, filters (cuisine, meal type, cook time, rating), and pagination
-- User authentication (register, sign in, sign out)
-- Recipe detail page with ingredients, instructions, and nutrition info
-- AI cooking assistant chatbot on each recipe page
-- Create and submit recipes for admin review
-- Admin panel to approve or reject user-submitted recipes
-- My Recipes page to view saved and created recipes
-- Protected routes for authenticated users
 
-## Setup Instructions
+### Core Functionality
+
+**User Authentication & Profiles**
+- Register, sign in, and sign out via Firebase Authentication
+- Protected routes for authenticated users only
+
+**Recipe Browsing**
+- Browse official recipes powered by the DummyJSON API
+- Search by keyword, filter by cuisine, meal type, cook time, and rating
+- Paginated results for smooth browsing
+
+**Recipe Detail**
+- Full recipe info: ingredients, instructions, and nutrition
+- AI cooking assistant chatbot on every recipe page
+- Save recipes directly from the detail page
+
+**User Recipes**
+- Create and submit recipes for admin review
+- My Recipes page to toggle between saved and created recipes
+- Edit or delete your own created recipes, remove saved ones
+
+**Admin Panel**
+- Dedicated admin account with access to a review queue
+- Approve or reject user-submitted recipes before they go live
+
+**Design & UX**
+- Fully responsive design
+- Clean UI built with Material UI and a custom dark teal / yellow theme
+
+---
+
+## Installation
 
 ### Prerequisites
+
 - Node.js v18+
-- Firebase project with Firestore and Authentication enabled
-- OpenAI API key
+- npm or yarn
+- Git
+- A Firebase project with Firestore and Authentication enabled
+- An OpenAI API key
 
-### Installation
+### Local Setup
 
-**Clone the repo:**
+1. **Clone the repository**
 ```bash
-git clone https://github.com/serenren13/recipeApp.git
-cd recipeApp
+   git clone https://github.com/serenren13/recipeApp.git
+   cd recipeApp
 ```
 
-**Backend:**
+2. **Install backend dependencies**
 ```bash
-cd backend
-npm install
+   cd backend
+   npm install
 ```
 
-Create a `.env` file in the `backend/` folder:
-```
-OPENAI_API_KEY=your_openai_api_key
-```
-
+3. **Install frontend dependencies**
 ```bash
-npm start
+   cd ../frontend
+   npm install
 ```
 
-**Frontend:**
+4. **Return to root directory**
 ```bash
-cd frontend
-npm install
+   cd ..
 ```
 
-Create a `.env` file in the `frontend/` folder:
-```
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
+---
 
-```bash
-npm run dev
-```
+## External Setup
 
-## API Info
-- **DummyJSON Recipes:** `https://dummyjson.com/recipes` — provides official recipe data
-- **Backend API:** runs on `http://localhost:5001`
-  - `GET /api/recipes/official` — browse recipes with optional `?q=`, `?tag=`, `?mealType=`
-  - `GET /api/recipes/official/:id` — get single recipe
-  - `GET /api/recipes/official/tags` — get all tags
-  - `GET /api/recipes/official/cuisines` — get cuisine tags
-  - `POST /api/ai/chat` — AI cooking assistant
+### Firebase Configuration
 
-## Git Workflow
-- Feature branches + PRs with review before merging
-- Conventional Commits format
-- Rebase over merge when updating feature branches
+1. **Create a Firebase Project**
+   - Visit [Firebase Console](https://console.firebase.google.com/)
+   - Click "Add project"
+   - Enable **Firestore** and **Authentication** (Email/Password provider)
+
+2. **Get Firebase Credentials**
+   - Go to Project Settings → General → Your apps → Web app
+   - Register an app to receive your Firebase config object
+
+3. **Store Credentials**
+   - Add each value to your frontend `.env` file (see Environment Variables below)
+
+### OpenAI Configuration
+
+1. **Create an OpenAI Account**
+   - Visit [OpenAI Platform](https://platform.openai.com/)
+   - Log in or create an account
+
+2. **Generate an API Key**
+   - Go to API Keys → Create new secret key
+   - Copy and store it securely — it won't be shown again
+
+3. **Store Credentials**
+   - Add the key to your backend `.env` file (see Environment Variables below)
+
+### Environment Variables
+
+#### Backend (`backend/.env`)
